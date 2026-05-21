@@ -1,0 +1,44 @@
+pipeline{
+    agent any
+    
+    stages{
+        stage("Code Clone"){
+            steps{
+                echo "Code Clone Stage"
+                git url: "https://github.com/sumedh-star/Node-Todo-App.git", branch: "master"
+                echo "code clone successfully"
+            }
+        }
+        
+        stage ("Code Build") {
+            steps {
+        
+        echo "code build stage"
+        sh "docker build -t node-todo-app:latest ."
+        echo " code builded successfully"
+     }
+   }
+   
+   stage("Image Push To DockerHub"){
+            steps{
+                echo "pushing container image int the docker-Hub is in progress"
+                withCredentials([usernamePassword(
+                    credentialsId:"dockerhubcred",
+                    usernameVariable:"dockerHubUser", 
+                    passwordVariable:"dockerHubPass")]){
+                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                sh "docker image tag node-todo-app:latest ${env.dockerHubUser}/node-todo-app:latest"
+                sh "docker push ${env.dockerHubUser}/node-todo-app:latest"
+                echo " container Image pushed into the docker hub successfully"
+                }
+            }
+   }
+  
+   stage ("Deploy and setup prometheus and grafana") {
+       steps{
+           sh "docker compose down && docker compose up -d --build"
+           
+ }
+} 
+}
+}
