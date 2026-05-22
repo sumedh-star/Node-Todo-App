@@ -2,7 +2,7 @@ pipeline{
     agent any
     
     stages{
-        stage("Code Clone"){
+        stage("Checkout"){
             steps{
                 echo "Code Clone Stage"
                 git url: "https://github.com/sumedh-star/Node-Todo-App.git", branch: "master"
@@ -10,7 +10,7 @@ pipeline{
             }
         }
         
-        stage ("Code Build") {
+        stage ("Build") {
             steps {
         
         echo "code build stage"
@@ -18,8 +18,13 @@ pipeline{
         echo " code builded successfully"
      }
    }
+   stage (" Test") {
+       steps{
+           echo " code is test successfully"
+       }
+   }
    
-   stage("Image Push To DockerHub"){
+   stage("Push Image"){
             steps{
                 echo "pushing container image int the docker-Hub is in progress"
                 withCredentials([usernamePassword(
@@ -34,9 +39,10 @@ pipeline{
             }
    }
   
-   stage ("Deploy and setup prometheus and grafana") {
+   stage ("Deploy") {
        steps{
            sh "docker compose down && docker compose up -d --build"
+           echo " Application is deployed successfully in the EC2 server"
            
  }
 } 
